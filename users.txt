@@ -1,0 +1,43 @@
+SNMP V3 POLLING DETAILS
+
+ 
+
+name - sipmonuser
+
+privacy type - DES
+
+privacy key - sipmonpassword
+
+authorization type - HMAC-SHA2-256
+
+authorization key - sipmonpassword
+
+ 
+
+SNMP V3 TRAPS DETAILS
+
+ 
+
+security level - authpriv
+
+security key - sipmonpassword
+
+ 
+
+SIPMON READ-ONLY USER CREDENTIALS ( user will be expired by one month )
+
+ 
+
+username - sipmonuser
+
+password - Sipmon@password2021
+
+IP Addressess of APIC Nodes (DR)
+
+APIC 1:10.18.46.226
+APIC 2:10.18.46.227
+APIC 3:10.18.46.228
+SPINE 1:10.18.46.229
+SPINE 2:10.18.46.230
+LEAF 1:10.18.46.231
+LEAF 2:10.18.46.232
