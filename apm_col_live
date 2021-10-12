@@ -1,0 +1,80 @@
+#!/bin/bash
+#
+# tomcat     This shell script takes care of starting and stopping SIPMON APM WEB
+#
+
+
+TOMCAT_USER=root
+#TOMCAT_HOME="/opt/collector/"
+TOMCAT_HOME="/data/service/production/collector-2-3-1/"
+SHUTDOWN_WAIT=45
+
+tomcat_pid() {
+    echo `ps aux | grep pinpoint-collector-boot-2.3.1-SNAPSHOT.jar | grep -v grep | awk '{ print $2 }'`
+}
+
+start() {
+    pid=$(tomcat_pid)
+    if [ -n "$pid" ]
+    then
+        echo "SIPMon APM Collector is already running (pid: $pid)"
+    else
+        # Start tomcat
+        echo "Starting SIPMon APM Collector"
+       # /bin/su - -c "cd $TOMCAT_HOME/bin && $TOMCAT_HOME/bin/startup.sh"
+       /bin/su - -c "cd $TOMCAT_HOME && nohup java -jar pinpoint-collector-boot-2.3.1-SNAPSHOT.jar -spring.config.additional-location=./config/collector.properties &"
+    fi
+    return 0
+}
+
+stop() {
+    pid=$(tomcat_pid)
+    if [ -n "$pid" ]
+    then
+        echo "Stopping SIPMon APM Collector"
+        /bin/su - -c "cd $TOMCAT_HOME && kill -9 $pid"
+
+    let kwait=$SHUTDOWN_WAIT
+    count=0
+    count_by=5
+    until [ `ps -p $pid | grep -c $pid` = '0' ] || [ $count -gt $kwait ]
+    do
+        echo "Waiting for processes to exit. Timeout before we kill the pid: ${count}/${kwait}"
+        sleep $count_by
+        let count=$count+$count_by;
+    done
+
+    if [ $count -gt $kwait ]; then
+        echo "Killing processes which didn't stop after $SHUTDOWN_WAIT seconds"
+        kill -9 $pid
+    fi
+    else
+        echo "SIPMon APM Collector is not running"
+    fi
+
+    return 0
+}
+
+case $1 in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    status)
+       pid=$(tomcat_pid)
+        if [ -n "$pid" ]
+        then
+           echo "SIPMon APM Collector is running with pid: $pid"
+        else
+           echo "SIPMon APM Collector is not running"
+        fi
+        ;;
+esac
+
+exit 0
